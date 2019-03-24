@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+
+  elasticsearch:
+    hostname: elasticsearch
+    container_name: elasticsearch
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    networks:
+      - elk
+
+  kibana:
+    hostname: kibana
+    container_name: kibana
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    ports:
+      - 5601:5601
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./kibana/config/:/usr/share/kibana/config:ro
+      - ./kibana/data:/usr/share/kibana/data
+
+  cassandra:
+    hostname: cassandra
+    container_name: cassandra
+    image: cassandra:2.1.18
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - 9042:9042
+      - 9160:9160
+    volumes:
+      - ./cassandra/data:/var/lib/cassandra
+
+
+networks:
+
+  elk:
+    driver: bridge
