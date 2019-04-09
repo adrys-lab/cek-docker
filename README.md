@@ -2,7 +2,11 @@
 
 The scope of this project is to provide useful docker containers to ease development.
 
-Added tools are:
+Tools in containers are:
+- Cassandra
+- Elasticsearch
+- Kibana
+
 
 ### Cassandra
 
